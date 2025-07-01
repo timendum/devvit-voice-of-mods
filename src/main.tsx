@@ -4,10 +4,8 @@ Devvit.configure({
   redditAPI: true,
 });
 
-const writeCommentForm = Devvit.createForm(
-  (data) => ({
-    title: "Reply anonymously as a moderator",
-    fields: [
+
+const replyFields: FormField[] = [
       {
         type: "paragraph",
         name: "body",
@@ -26,39 +24,35 @@ const writeCommentForm = Devvit.createForm(
         label: "Lock reply?",
         defaultValue: true,
       },
-      {
-        type: "string",
-        name: "commentId",
-        label: "Ignore (Parent comment id)",
-        defaultValue: data.commentId,
-        disabled: true,
-      },
-      {
-        type: "string",
-        name: "postId",
-        label: "Ignore (Parent post id)",
-        defaultValue: data.postId,
-        disabled: true,
-      },
-    ],
+];
+
+
+const writeCommentForm = Devvit.createForm(
+  () => ({
+    title: "Reply anonymously as a moderator",
+    fields: replyFields,
     acceptLabel: "Submit",
     cancelLabel: "Cancel",
   }),
-  async (event, context) => {
-    console.log("Submitted with body:", event.values);
-    const body = event.values.body?.trim() || "";
+  async ({ values }, context) => {
+    console.log("Submitted with body:", values);
+    const body = values.body?.trim() || "";
     if (body.length < 1) {
       context.ui.showToast("Empty comment body, no reply sent.");
       return;
     }
+    // if (!values.lock && !values.remove) {
+    //  context.ui.showToast('You must select either lock or distinguish.');
+    //  return;
+    // }
     let comment = undefined;
     if (event.values.commentId !== "-") {
       const parentComment = await context.reddit.getCommentById(
-        event.values.commentId,
+        context.commentId,
       );
       comment = await parentComment.reply({ text: body });
     } else if (event.values.postId !== "-") {
-      const post = await context.reddit.getPostById(event.values.postId);
+      const post = await context.reddit.getPostById(context.postId);
       comment = await post.addComment({ text: body });
     }
     if (!comment) {
