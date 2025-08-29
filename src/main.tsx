@@ -58,12 +58,12 @@ const writeCommentForm = Devvit.createForm(
       return;
     }
     let addReply: Reply | undefined = undefined;
-    if (values.commentId != undefined) {
+    if (values.commentId && values.commentId !== "-") {
       const parentComment = await context.reddit.getCommentById(
         values.commentId
       );
       addReply = parentComment.reply;
-    } else if (values.postId != undefined) {
+    } else if (values.postId && values.postId !== "-") {
       const post = await context.reddit.getPostById(values.postId);
       addReply = post.addComment;
     }
