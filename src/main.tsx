@@ -1,14 +1,8 @@
-import {
-  type Comment,
-  type CommentSubmissionOptions,
-  Devvit,
-} from "@devvit/public-api";
+import { Devvit } from "@devvit/public-api";
 
 Devvit.configure({
   redditAPI: true,
 });
-
-type Reply = (options: CommentSubmissionOptions) => Promise<Comment>;
 
 const writeCommentForm = Devvit.createForm(
   (data) => ({
@@ -57,21 +51,20 @@ const writeCommentForm = Devvit.createForm(
       context.ui.showToast("Empty comment body, no reply sent.");
       return;
     }
-    let addReply: Reply | undefined = undefined;
+    let comment = undefined;
     if (values.commentId && values.commentId !== "-") {
       const parentComment = await context.reddit.getCommentById(
         values.commentId
       );
-      addReply = parentComment.reply;
+      comment = await parentComment.reply({ text: body });
     } else if (values.postId && values.postId !== "-") {
       const post = await context.reddit.getPostById(values.postId);
-      addReply = post.addComment;
+      comment = await post.addComment({ text: body });
     }
-    if (!addReply) {
+    if (!comment) {
       context.ui.showToast("No content found to reply to.");
       return;
     }
-    const comment = await addReply({ text: body });
     console.log("Comment done :", comment.permalink);
     if (values.lock) {
       await comment.lock();
