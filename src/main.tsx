@@ -1,8 +1,14 @@
-import { Devvit } from "@devvit/public-api";
+import {
+  type Comment,
+  type CommentSubmissionOptions,
+  Devvit,
+} from "@devvit/public-api";
 
 Devvit.configure({
   redditAPI: true,
 });
+
+type Reply = (options: CommentSubmissionOptions) => Promise<Comment>;
 
 const writeCommentForm = Devvit.createForm(
   (data) => ({
@@ -44,36 +50,37 @@ const writeCommentForm = Devvit.createForm(
     acceptLabel: "Submit",
     cancelLabel: "Cancel",
   }),
-  async (event, context) => {
-    console.log("Submitted with body:", event.values);
-    const body = event.values.body?.trim() || "";
+  async ({ values }, context) => {
+    console.log("Submitted with body:", values);
+    const body = values.body?.trim() || "";
     if (body.length < 1) {
       context.ui.showToast("Empty comment body, no reply sent.");
       return;
     }
-    let comment = undefined;
-    if (event.values.commentId !== "-") {
+    let addReply: Reply | undefined = undefined;
+    if (values.commentId != undefined) {
       const parentComment = await context.reddit.getCommentById(
-        event.values.commentId,
+        values.commentId
       );
-      comment = await parentComment.reply({ text: body });
-    } else if (event.values.postId !== "-") {
-      const post = await context.reddit.getPostById(event.values.postId);
-      comment = await post.addComment({ text: body });
+      addReply = parentComment.reply;
+    } else if (values.postId != undefined) {
+      const post = await context.reddit.getPostById(values.postId);
+      addReply = post.addComment;
     }
-    if (!comment) {
+    if (!addReply) {
       context.ui.showToast("No content found to reply to.");
       return;
     }
+    const comment = await addReply({ text: body });
     console.log("Comment done :", comment.permalink);
-    if (event.values.lock) {
+    if (values.lock) {
       await comment.lock();
     }
-    if (event.values.distinguish) {
+    if (values.distinguish) {
       await comment.distinguish(true);
     }
     context.ui.showToast("Replied, refresh the page to see the comment.");
-  },
+  }
 );
 
 Devvit.addMenuItem({
@@ -96,15 +103,15 @@ Devvit.addMenuItem({
       return;
     }
     const permissions = await user.getModPermissionsForSubreddit(
-      context.subredditName,
+      context.subredditName
     );
     console.log(
       `Permissions of ${context.userId} for ${context.subredditName}:`,
-      permissions,
+      permissions
     );
     if (!permissions.includes("mail") && !permissions.includes("all")) {
       context.ui.showToast(
-        "You do not have permission to reply as a moderator.",
+        "You do not have permission to reply as a moderator."
       );
       return;
     }
