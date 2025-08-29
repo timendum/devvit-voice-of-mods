@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "prettier": "npx prettier -w src"
+    "prettier": "npx prettier -w src",
+    "upload": "devvit upload --bump=minor",
+    "publish": "devvit publish --public"
   },
   "dependencies": {
     "@devvit/public-api": "0.11.17"
