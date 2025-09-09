@@ -1,7 +1,26 @@
-import { Devvit } from "@devvit/public-api";
+import { Devvit, type TriggerContext } from "@devvit/public-api";
 
 Devvit.configure({
   redditAPI: true,
+  redis: true,
+});
+
+async function handleAppInstallOrUpgrade(
+  event: { type: "AppInstall" } | { type: "AppUpgrade" },
+  context: TriggerContext,
+): Promise<void> {
+  await context.redis.expire("comment:*", 60 * 60 * 24 * 365); // Expiration for all keys
+  console.log("App installed or upgraded:", event);
+}
+
+Devvit.addTrigger({
+  event: "AppInstall",
+  onEvent: handleAppInstallOrUpgrade,
+});
+
+Devvit.addTrigger({
+  event: "AppUpgrade",
+  onEvent: handleAppInstallOrUpgrade,
 });
 
 const writeCommentForm = Devvit.createForm(
@@ -54,7 +73,7 @@ const writeCommentForm = Devvit.createForm(
     let comment = undefined;
     if (values.commentId && values.commentId !== "-") {
       const parentComment = await context.reddit.getCommentById(
-        values.commentId
+        values.commentId,
       );
       comment = await parentComment.reply({ text: body });
     } else if (values.postId && values.postId !== "-") {
@@ -65,7 +84,7 @@ const writeCommentForm = Devvit.createForm(
       context.ui.showToast("No content found to reply to.");
       return;
     }
-    console.log("Comment done :", comment.permalink);
+    console.log("Comment done:", comment.permalink);
     if (values.lock) {
       await comment.lock();
     }
@@ -74,16 +93,17 @@ const writeCommentForm = Devvit.createForm(
     }
     const username = await context.reddit.getCurrentUsername();
     if (username) {
-      await context.redis.set(`comment:${comment.id}`, username);
+      const r = await context.redis.set(`comment:${comment.id}`, username);
+      console.log("Redis done:", r);
     }
     context.ui.showToast("Replied, refresh the page to see the comment.");
-  }
+  },
 );
 
 Devvit.addMenuItem({
   location: ["post", "comment"],
   label: "Reply as Mod",
-  description: "Or view the real moderator for created comments",
+  description: "And view the real moderator for created comments",
   forUserType: "moderator", // only for moderators
   onPress: async (event, context) => {
     console.log(`Pressed on ${event.targetId} by ${context.userId}`);
@@ -103,24 +123,22 @@ Devvit.addMenuItem({
     }
     // Check for the mod permissions
     const permissions = await user.getModPermissionsForSubreddit(
-      context.subredditName
+      context.subredditName,
     );
     console.log(
       `Permissions of ${context.userId} for ${context.subredditName}:`,
-      permissions
+      permissions,
     );
     if (!permissions.includes("mail") && !permissions.includes("all")) {
       context.ui.showToast(
-        "You do not have permission to reply as a moderator."
+        "You do not have permission to reply as a moderator.",
       );
       return;
     }
     // Check if the target is a comment created by the bot
-    let isBotComment = false;
     if (context.commentId) {
       const comment = await context.reddit.getCommentById(context.commentId);
       if (comment.authorName == context.appName) {
-        isBotComment = true;
         // Fetch the original moderator and display it
         const key = `comment:${context.commentId}`;
         try {
@@ -128,7 +146,7 @@ Devvit.addMenuItem({
           context.ui.showToast(
             opMod
               ? `Comment written by u/${opMod}`
-              : "No data found for this comment"
+              : "No data found for this comment",
           );
         } catch (e) {
           context.ui.showToast("Error reading from Redis");
@@ -136,12 +154,10 @@ Devvit.addMenuItem({
         }
       }
     }
-    if (!isBotComment) {
-      context.ui.showForm(writeCommentForm, {
-        commentId: context.commentId || "-",
-        postId: context.postId || "-",
-      });
-    }
+    context.ui.showForm(writeCommentForm, {
+      commentId: context.commentId || "-",
+      postId: context.postId || "-",
+    });
   },
 });
 
