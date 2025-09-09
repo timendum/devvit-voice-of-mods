@@ -72,6 +72,10 @@ const writeCommentForm = Devvit.createForm(
     if (values.distinguish) {
       await comment.distinguish(true);
     }
+    const username = await context.reddit.getCurrentUsername();
+    if (username) {
+      await context.redis.set(`comment:${comment.id}`, username);
+    }
     context.ui.showToast("Replied, refresh the page to see the comment.");
   }
 );
@@ -79,9 +83,11 @@ const writeCommentForm = Devvit.createForm(
 Devvit.addMenuItem({
   location: ["post", "comment"],
   label: "Reply as Mod",
+  description: "Or view the real moderator for created comments",
   forUserType: "moderator", // only for moderators
   onPress: async (event, context) => {
     console.log(`Pressed on ${event.targetId} by ${context.userId}`);
+    // Check for context data
     if (!context.userId) {
       context.ui.showToast("User not found.");
       return;
@@ -95,6 +101,7 @@ Devvit.addMenuItem({
       context.ui.showToast("Subreddit not found.");
       return;
     }
+    // Check for the mod permissions
     const permissions = await user.getModPermissionsForSubreddit(
       context.subredditName
     );
@@ -108,10 +115,33 @@ Devvit.addMenuItem({
       );
       return;
     }
-    context.ui.showForm(writeCommentForm, {
-      commentId: context.commentId || "-",
-      postId: context.postId || "-",
-    });
+    // Check if the target is a comment created by the bot
+    let isBotComment = false;
+    if (context.commentId) {
+      const comment = await context.reddit.getCommentById(context.commentId);
+      if (comment.authorName == context.appName) {
+        isBotComment = true;
+        // Fetch the original moderator and display it
+        const key = `comment:${context.commentId}`;
+        try {
+          const opMod = await context.redis.get(key);
+          context.ui.showToast(
+            opMod
+              ? `Comment written by u/${opMod}`
+              : "No data found for this comment"
+          );
+        } catch (e) {
+          context.ui.showToast("Error reading from Redis");
+          console.error(e);
+        }
+      }
+    }
+    if (!isBotComment) {
+      context.ui.showForm(writeCommentForm, {
+        commentId: context.commentId || "-",
+        postId: context.postId || "-",
+      });
+    }
   },
 });
 
