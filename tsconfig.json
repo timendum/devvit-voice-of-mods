@@ -1,3 +1,15 @@
 {
-  "extends": "@devvit/public-api/devvit.tsconfig.json"
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"]
 }
