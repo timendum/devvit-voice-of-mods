@@ -5,9 +5,9 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
-    "lint": "eslint && type-check",
-    "eslint": "eslint src",
-    "type-check": "tsc --noEmit -p src",
+    "checks": "npm run lint && npm run type-check",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit -p .",
     "prettier": "npx prettier -w src",
     "build": "vite build",
     "dev": "vite build && devvit playtest voice_of_mods_dev",
