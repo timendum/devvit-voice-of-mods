@@ -1,5 +1,5 @@
 import { reddit, redis } from "@devvit/web/server";
-import type { Comment, User } from "@devvit/web/server";
+import type { Comment } from "@devvit/web/server";
 import type { T1, T3 } from "@devvit/shared-types/tid.js";
 
 export type ReplyBaseProps = {
@@ -16,11 +16,7 @@ interface ReplyPostProps extends ReplyBaseProps {
   postId: T3;
 }
 
-async function handleContent(
-  props: ReplyBaseProps,
-  content: Comment,
-  user: User,
-) {
+async function handleContent(props: ReplyBaseProps, content: Comment) {
   console.log("Comment done:", content.permalink);
   const getUsername = reddit.getCurrentUsername();
   const lock = props.lock ? content.lock() : Promise.resolve(undefined);
@@ -49,7 +45,7 @@ export async function handleReplyComment(props: ReplyCommentProps) {
     return { success: false, message: "Can't get user" };
   }
   const content = await comment.reply({ text: props.body });
-  await handleContent(props, content, user);
+  await handleContent(props, content);
 }
 
 export async function handleReplyPost(props: ReplyPostProps) {
@@ -62,7 +58,7 @@ export async function handleReplyPost(props: ReplyPostProps) {
     return { success: false, message: "Can't get user" };
   }
   const content = await post.addComment({ text: props.body });
-  await handleContent(props, content, user);
+  await handleContent(props, content);
   console.log("Comment done:", content.permalink);
 }
 
