@@ -82,3 +82,7 @@ export async function findOpAuthor(commentId: T1) {
     }
   }
 }
+
+export async function initRedis() {
+  await redis.expire("comment:*", 60 * 60 * 24 * 365); // Expiration for all keys
+}
