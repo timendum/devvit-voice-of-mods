@@ -59,7 +59,6 @@ export async function handleReplyPost(props: ReplyPostProps) {
   }
   const content = await post.addComment({ text: props.body });
   await handleContent(props, content);
-  console.log("Comment done:", content.permalink);
 }
 
 export async function findOpAuthor(commentId: T1) {
