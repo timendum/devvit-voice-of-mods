@@ -30,7 +30,11 @@ async function handleContent(props: ReplyBaseProps, content: Comment) {
     distinguish,
   ]);
   if (username) {
-    const r = await redis.set(`comment:${content.id}`, username);
+    const expiration = new Date();
+    expiration.setFullYear(expiration.getFullYear() + 1);
+    const r = await redis.set(`comment:${content.id}`, username, {
+      expiration,
+    });
     console.log("Redis done:", r);
   }
 }
@@ -76,8 +80,4 @@ export async function findOpAuthor(commentId: T1) {
       console.error("Error reading from Redis", e);
     }
   }
-}
-
-export async function initRedis() {
-  await redis.expire("comment:*", 60 * 60 * 24 * 365); // Expiration for all keys
 }
