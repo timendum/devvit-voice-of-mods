@@ -17,7 +17,7 @@
   "dependencies": {
     "@devvit/public-api": "0.12.24",
     "@devvit/web": "^0.12.24",
-    "@hono/node-server": "^1.19.13",
+    "@hono/node-server": "^2.0.10",
     "hono": "^4.12.26"
   },
   "devDependencies": {
