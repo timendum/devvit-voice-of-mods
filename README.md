@@ -1,17 +1,16 @@
-A mod helper to reply as a MOD without exposing your user.
+A mod shared account replacement, to reply as a mod team, not as yourself.
 
-Source code available on [Github](https://github.com/timendum/devvit-voice-of-mods).
+Voice of Mods lets moderators post replies as a moderator
+without exposing the personal account behind the response.  
+It's useful for official announcements, moderation decisions, warnings, and other messages
+that should come from the mod team rather than an individual moderator.
 
 ## How to use
 
-- Install the app from this page!
-
-- Go to a post in your subreddit.
-
-- Click on the Mod action button (the shield icon)
-
-- Select "Reply as Mod"
-
-- Add a text, check for lock and distinguish options
-
-- Refresh the page and see the result
+1. Install Voice of Mods from this page.
+2. Open a post in your subreddit.
+3. Click the **Mod Actions** button (shield icon).
+4. Select **Reply as Mod**.
+5. Write your reply.
+6. Optionally choose whether to **lock** or **distinguish** the reply.
+7. Submit your reply and refresh the page to see the result.
