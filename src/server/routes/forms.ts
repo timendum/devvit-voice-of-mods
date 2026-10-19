@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { UiResponse } from "@devvit/web/shared";
 import { isT1, isT3 } from "@devvit/shared-types/tid.js";
 import { handleReplyComment, handleReplyPost } from "../core/voice";
+import { context } from "@devvit/web/server";
 
 type WriteFormValues = {
   body?: string;
@@ -23,6 +24,7 @@ const OK_TOAST: Pick<UiResponse, "showToast"> = {
 forms.post("/write-comment-submit", async (c) => {
   const values = await c.req.json<WriteFormValues>();
   console.log("Form values", values);
+  console.debug("write-comment-submit context:", context);
   const normalized = {
     body: values.body?.trim(),
     distinguish: Boolean(values.distinguish),
