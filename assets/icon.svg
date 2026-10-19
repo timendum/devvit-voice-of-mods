@@ -1,0 +1,58 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+>
+  <!-- Dark background -->
+  <rect
+    width="512"
+    height="512"
+    rx="88"
+    fill="#26313D"
+  />
+
+  <!-- Shield -->
+  <path
+    d="M72 142
+       C122 102 186 82 256 82
+       C326 82 390 102 440 142
+       L426 276
+       C418 352 372 415 310 451
+       C289 464 271 473 256 480
+       C241 473 223 464 202 451
+       C140 415 94 352 86 276
+       Z"
+    fill="#356B58"
+    stroke="#17251F"
+    stroke-width="20"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+
+  <!-- Speech bubble -->
+  <path
+    d="M151 188
+       H361
+       C383 188 401 206 401 228
+       V285
+       C401 307 383 325 361 325
+       H274
+       L211 374
+       L225 325
+       H151
+       C129 325 111 307 111 285
+       V228
+       C111 206 129 188 151 188
+       Z"
+    fill="#FFFFFF"
+    stroke="#17251F"
+    stroke-width="17"
+    stroke-linejoin="round"
+  />
+
+  <!-- Voice dots -->
+  <circle cx="207" cy="255" r="12" fill="#48B97F" />
+  <circle cx="256" cy="255" r="12" fill="#48B97F" />
+  <circle cx="305" cy="255" r="12" fill="#48B97F" />
+</svg>

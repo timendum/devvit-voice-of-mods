@@ -35,5 +35,8 @@
   "triggers": {
     "onAppInstall": "/internal/triggers/app-install",
     "onAppUpgrade": "/internal/triggers/app-upgrade"
+  },
+  "marketingAssets": {
+    "icon": "assets/icon.png"
   }
 }
